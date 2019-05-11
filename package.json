@@ -1,0 +1,25 @@
+{
+  "name": "1-day-audio-captcha",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klanmiko/1-day-audio-CAPTCHA.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/klanmiko/1-day-audio-CAPTCHA/issues"
+  },
+  "homepage": "https://github.com/klanmiko/1-day-audio-CAPTCHA#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-fileupload": "^1.1.4",
+    "node-opus": "^0.3.1",
+    "ogg": "^1.2.6"
+  }
+}
