@@ -1,0 +1,31 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <button onclick="record()">Record</button>
+    <button onclick="stop()">Stop</button>
+    <audio id="player" controls></audio>
+    <script>
+      var recorder;
+      function stop() {
+        if(recorder) {
+          let file = recorder.stop();
+        }
+      }
+      function record() {
+        navigator.mediaDevices.getUserMedia({audio: true, video: false})
+          .then(function(stream){
+            let player = document.getElementById('player');
+
+
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = function(e) {
+              let url = URL.createObjectURL(e.data);
+              player.src = url;
+            }
+            recorder.start();
+          });
+      }
+    </script>
+  </body>
+</html>
