@@ -20,7 +20,7 @@ Kamal Sadek
 
 Monisha Selvanayagam Ravindar
 * Last week: I worked on generating random captcha phrases.
-* This week:
+* This week: More efficient way of generating phrases, collect more data for bot vs human speech 
 * Issues: I need to use a different method in obtaining random words from the dictionary. The open source library I'm using generates very obscure words, and the filtering options provided do not work sufficiently.
 
 Trello: https://trello.com/b/mahKWlUO/ecs-153-final-project
