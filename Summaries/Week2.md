@@ -14,9 +14,9 @@ Kaelan Mikowicz
 * Issues: Understanding how GMM works, finding libraries that can do the ML heavy lifting.
 
 Kamal Sadek
-* Last week:
-* This week:
-* Issues:
+* Last week: Researched papers audio CAPTCHA papers, and helped implement the proof of concepts for various algorithms.
+* This week: Developed the MFCC model that extracts coefficients from an audio sample, and then uses closest neighbors to compare that sample to known human and bot speech, and based on the closest neighbor categorizes the input.
+* Issues: Getting enough data for the closest neighbors algorithm.
 
 Monisha Selvanayagam Ravindar
 * Last week: I worked on generating random captcha phrases.
