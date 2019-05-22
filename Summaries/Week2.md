@@ -4,14 +4,14 @@
 Group Update:
 
 Andrei Blebea
-* Last week:
-* This week:
-* Issues:
+* Last week: Looked into using MFCC audio features to classify voice samples. Effectiveness is questionable, but seems to work sometimes. Looked into basic classification methods.
+* This week: Look into pitch tracking. Possibly normalize samples based on pitch. Possibly look for structural indicators of artificial voice.
+* Issues: MFCC seems fairly chaotic i.e. different audio samples from the same person may seem very different.
 
 Kaelan Mikowicz
-* Last week:
-* This week:
-* Issues:
+* Last week: Wrote a simple flask server that is able to record and save a user's voice from a web page. Discovered ASVspoof and using GMM implementation on MFCC features.
+* This week: Integrate captcha generation from Monisha, test combinations of machine learning + feature extraction
+* Issues: Understanding how GMM works, finding libraries that can do the ML heavy lifting.
 
 Kamal Sadek
 * Last week:
