@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from model import Model
 import os
 import wave
+import array
 
 from captcha_gen.generator import generate_captcha
 
@@ -24,11 +25,18 @@ def audio():
     speech = request.files['speech']
     speech.save('./speech.ogg')
     opus = pyogg.OpusFile('./speech.ogg')
-    print(opus.buffer)
+
+    a = array.array('h')
+    for i in range(int(opus.buffer_length / 2)):
+      a.append(opus.buffer[i])
+
     with wave.open('./speech.wav', 'wb') as writer:
       writer.setnchannels(opus.channels)
       writer.setframerate(opus.frequency)
       writer.setnframes(opus.buffer_length)
       writer.setsampwidth(2)
-      writer.writeframes(opus.buffer)
+      writer.writeframesraw(a)
+
+    with wave.open('./speech.wav', 'rb') as reader:
+      print(reader.getparams())
     return app.make_response(model.label('./speech.wav'))
