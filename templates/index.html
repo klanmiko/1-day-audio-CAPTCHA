@@ -2,9 +2,11 @@
   <head>
   </head>
   <body>
+    <p>{{ captcha }}</p>
     <button onclick="record()">Record</button>
     <button onclick="stop()">Stop</button>
     <audio id="player" controls></audio>
+    <p id="result"></p>
     <script>
       var recorder;
       function stop() {
@@ -16,9 +18,10 @@
         navigator.mediaDevices.getUserMedia({audio: true, video: false})
           .then(function(stream){
             let player = document.getElementById('player');
-
-
-            recorder = new MediaRecorder(stream);
+            let canWav = MediaRecorder.isTypeSupported("audio/wav") ? "audio/wav" : "audio/ogg";
+            recorder = new MediaRecorder(stream, {
+              mimeType: canWav
+            });
             recorder.ondataavailable = function(e) {
               let url = URL.createObjectURL(e.data);
               player.src = url;
@@ -27,6 +30,10 @@
               data.append('speech', e.data);
 
               let request = new XMLHttpRequest()
+              request.onload = function() {
+                let result = document.getElementById('result')
+                result.innerText = request.responseText;
+              }
               request.open('POST', '/audio', true);
               request.send(data);
             }

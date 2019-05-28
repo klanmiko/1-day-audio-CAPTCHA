@@ -16,4 +16,4 @@ if rate1 != rate2:
 
 data3 = numpy.append(data1, data2, axis=0)
 
-scipy.io.wavfile.write("TEMP.wav", rate1, data3);
+scipy.io.wavfile.write("TEMP.wav", rate1, data3)
