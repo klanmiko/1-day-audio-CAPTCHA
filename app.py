@@ -27,7 +27,7 @@ def audio():
     opus = pyogg.OpusFile('./speech.ogg')
 
     a = array.array('h')
-    for i in range(int(opus.buffer_length / 2)):
+    for i in range(int(opus.buffer_length / 2)): # pyogg doubles it for some reason
       a.append(opus.buffer[i])
 
     with wave.open('./speech.wav', 'wb') as writer:
@@ -37,6 +37,4 @@ def audio():
       writer.setsampwidth(2)
       writer.writeframesraw(a)
 
-    with wave.open('./speech.wav', 'rb') as reader:
-      print(reader.getparams())
     return app.make_response(model.label('./speech.wav'))
