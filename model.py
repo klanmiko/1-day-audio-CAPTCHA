@@ -5,7 +5,7 @@ import numpy as np
 import pdb
 import os
 
-from python_speech_features import mfcc, logfbank
+from python_speech_features import mfcc, logfbank, delta
 from scipy.spatial import distance
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -17,7 +17,8 @@ bad_dir = os.path.join(os.path.curdir, "dataset","train", "bad")
 def extract_features(audio):
   (rate, sig) = wav.read(audio)
   features = mfcc(sig, rate, nfft=1024)
-  return features
+  d = delta(features, 2)
+  return list(map(lambda x, y: x + y, features, d))
 
 class Model():
   def train(self):
