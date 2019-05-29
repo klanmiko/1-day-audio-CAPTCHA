@@ -7,7 +7,7 @@ import os
 
 from python_speech_features import mfcc, logfbank
 from scipy.spatial import distance
-from scipy.spatial import KDTree
+from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.mixture import GaussianMixture
 
@@ -18,24 +18,6 @@ def extract_features(audio):
   (rate, sig) = wav.read(audio)
   features = mfcc(sig, rate, nfft=1024)
   return features
-
-def k_argmax(array, k):
-  if k < len(array):
-    raise IndexError()
-  elif k == len(array):
-    return np.argsort(array).tolist()
-
-  argmax = [-1] * (k + 1)
-  for i in range(len(array)):
-    val = array[i]
-    for j in range(k):
-      if argmax[k - j] == -1 or val >= array[argmax[k - j]]:
-        argmax[k - j + 1] = array[argmax[k - j]]
-      elif val < array[argmax[k - j]]:
-        argmax[k - j + 1] = i
-    if val > array[argmax[0]]:
-      argmax[0] = i
-  return argmax[0:k]
 
 class Model():
   def train(self):
@@ -48,8 +30,7 @@ class Model():
         self.bad_data.append(extract_features(os.path.join(bad_dir, audio)))
 
     self.data = self.good_data + self.bad_data
-    train = np.concatenate(self.data)
-    self.tree = KDTree(train)
+    self.labels = [1] * sum(map(len, self.good_data)) + [0] * sum(map(len, self.bad_data))
 
     self.GMM_good = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
     self.GMM_good.fit(np.concatenate(self.good_data))
@@ -57,30 +38,16 @@ class Model():
     self.GMM_bad = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
     self.GMM_bad.fit(np.concatenate(self.bad_data))
 
+    self.kNN = KNeighborsClassifier(algorithm="kd_tree")
+    self.kNN.fit(np.concatenate(self.data), self.labels)
+
   def label(self, audio):
     feat = extract_features(audio)
-    closest_count = [0] * len(self.data)
-    lengths = list(map(len, self.data))
-    for d in feat:
-        (dist, ind) = self.tree.query(d)
-        for i, l in enumerate(lengths):
-            ind -= l
-            if ind < 0:
-                closest_count[i] += 1
-                break
-    print(closest_count)
-    try:
-      kNN = k_argmax(closest_count, 3)
-      print(kNN)
-      good_count = 0
-      bad_count = 0
-      for k in range(len(kNN)):
-        if kNN[k] < len(self.good_data):
-          good_count += 1
-        else:
-          bad_count += 1
-    except:
-      pass
+    
+    prediction = self.kNN.predict(feat)
+    good_count = sum(prediction)
+    bad_count = len(prediction) - good_count
+    print(good_count - bad_count)
       
     gscore = self.GMM_good.score(feat)
     bscore = self.GMM_bad.score(feat)
