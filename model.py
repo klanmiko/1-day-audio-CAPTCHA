@@ -51,10 +51,10 @@ class Model():
     train = np.concatenate(self.data)
     self.tree = KDTree(train)
 
-    self.GMM_good = GaussianMixture(n_components=3, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
+    self.GMM_good = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
     self.GMM_good.fit(np.concatenate(self.good_data))
 
-    self.GMM_bad = GaussianMixture(n_components=3, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
+    self.GMM_bad = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
     self.GMM_bad.fit(np.concatenate(self.bad_data))
 
   def label(self, audio):
@@ -86,5 +86,7 @@ class Model():
     bscore = self.GMM_bad.score(feat)
 
     score = gscore - bscore
+
+    print(score)
 
     return 'good' if score > 0 else 'bad'
