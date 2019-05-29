@@ -2,6 +2,7 @@ import numpy
 import scipy
 import scipy.io.wavfile
 import os
+import fnmatch
 
 text_as_wav = lambda text, frequency : print("echo " + text + " | text2wave -scale 2 -o __tempfile.wav; sox -S __tempfile.wav __tempfile2.wav rate -L -s " + str(frequency))
 
