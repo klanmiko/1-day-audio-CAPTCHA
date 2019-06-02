@@ -111,7 +111,8 @@ class Model():
     print("Ordered matches: ")
     print(matches)
 
-    t1 = threading.Thread(target=self.plot, args=(self, audio, matches)) 
+    t1 = threading.Thread(target=self.plot, args=(audio, matches))
+    t1.start()
 
     score = gscore - bscore
 
