@@ -25,20 +25,20 @@ class Model():
     self.good_data = []
     self.bad_data = []
     self.labels = []
-    self.label = 0
+    self.l_count = 0
     for audio in os.listdir(good_dir):
         features = extract_features(os.path.join(good_dir, audio))
         self.good_data.append(features)
-        self.labels += ([self.label] * len(features))
-        self.label += 1
+        self.labels += ([self.l_count] * len(features))
+        self.l_count += 1
 
-    self.cutoff = self.label
+    self.cutoff = self.l_count
 
     for audio in os.listdir(bad_dir):
         features = extract_features(os.path.join(bad_dir, audio))
         self.bad_data.append(features)
-        self.labels += ([self.label] * len(features))
-        self.label += 1
+        self.labels += ([self.l_count] * len(features))
+        self.l_count += 1
 
     self.data = self.good_data + self.bad_data
 
@@ -59,7 +59,7 @@ class Model():
     good_count = len([i for i in prediction if i <= self.cutoff])
     bad_count = len(prediction) - good_count
 
-    mapping = [0] * self.label
+    mapping = [0] * self.l_count
     for i in prediction:
       mapping[i] += 1
 
