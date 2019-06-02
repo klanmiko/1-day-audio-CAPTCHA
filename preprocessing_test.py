@@ -8,40 +8,43 @@ from itertools import zip_longest
 import pdb
 
 #AUDIO_FILE = 'dataset/train/good/andre.wav'
-AUDIO_FILE = 'stitched.wav'
 
-def grouper(n, iterable, fillvalue=None):
-    args = [iter(iterable)] * n
-    return zip_longest(fillvalue=fillvalue, *args)
+def remove_silence(AUDIO_FILE):
+    AUDIO_FILE = 'stitched.wav'
 
-sound = AudioSegment.from_file(AUDIO_FILE)
+    def grouper(n, iterable, fillvalue=None):
+        args = [iter(iterable)] * n
+        return zip_longest(fillvalue=fillvalue, *args)
 
-samples = sound.get_array_of_samples()
+    sound = AudioSegment.from_file(AUDIO_FILE)
 
-result = []
+    samples = sound.get_array_of_samples()
 
-for sample in grouper(10000, samples, 0):
-    if np.mean(np.abs(sample)) > 300:
-        result += list(sample)
+    result = []
 
-result = array.array(sound.array_type, result)
+    for sample in grouper(10000, samples, 0):
+        if np.mean(np.abs(sample)) > 300:
+            result += list(sample)
 
-print(len(result))
-print(len(samples))
+    result = array.array(sound.array_type, result)
 
-new_sound = sound._spawn(result)
-new_sound.export('test_new.wav', format='wav')
+    print(len(result))
+    print(len(samples))
 
-plt.subplot(2,1,2)
-plt.plot(new_sound.get_array_of_samples())
+    new_sound = sound._spawn(result)
+    new_sound.export('test_new.wav', format='wav')
+    return 'test_new.wav'
 
-new_sound = sound._spawn(samples)
-new_sound.export('test_sound.wav', format='wav')
+# plt.subplot(2,1,2)
+# plt.plot(new_sound.get_array_of_samples())
 
-plt.subplot(2,1,1)
-plt.plot(new_sound.get_array_of_samples())
+# new_sound = sound._spawn(samples)
+# new_sound.export('test_sound.wav', format='wav')
 
-plt.show()
+# plt.subplot(2,1,1)
+# plt.plot(new_sound.get_array_of_samples())
 
-#pdb.set_trace()
+# plt.show()
+
+# #pdb.set_trace()
 
