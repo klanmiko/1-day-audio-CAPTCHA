@@ -72,7 +72,7 @@ test_average_coeff = np.average(test_feat, axis=0)
 
 #print(distance.euclidean(andre_average_coeff, andre_average_coeff))
 
-data = [andre_feat, andre2_feat, andre3_feat, kaelan_feat, kaelan2_feat, bot_feat, bot2_feat, bot3_feat]
+data = [andre_feat, andre2_feat, andre3_feat, kaelan_feat, kaelan2_feat, bot2_feat, bot3_feat]
 lengths = list(map(len, data))
 train = np.concatenate(data)
 tree = KDTree(train)
