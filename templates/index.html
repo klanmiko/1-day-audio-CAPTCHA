@@ -1,5 +1,10 @@
 <html>
   <head>
+    <style>
+      #player {
+        display: block;
+      }
+    </style>
   </head>
   <body>
     <p>{{ captcha }}</p>
@@ -7,6 +12,7 @@
     <button onclick="stop()">Stop</button>
     <audio id="player" controls></audio>
     <p id="result"></p>
+    <p id="text"></p>
     <script>
       var recorder;
       function stop() {
@@ -15,6 +21,10 @@
         }
       }
       function record() {
+        let result = document.getElementById('result')
+        let text = document.getElementById('text')
+        result.innerText = "";
+        text.innerText = "";
         navigator.mediaDevices.getUserMedia({audio: true, video: false})
           .then(function(stream){
             let player = document.getElementById('player');
@@ -31,8 +41,9 @@
 
               let request = new XMLHttpRequest()
               request.onload = function() {
-                let result = document.getElementById('result')
-                result.innerText = request.responseText;
+                let json = JSON.parse(request.response)
+                result.innerText = json.label;
+                text.innerText = json.speech;
               }
               request.open('POST', '/audio', true);
               request.send(data);

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import pyogg
 import audioop
 from scipy import signal
@@ -42,8 +42,11 @@ def audio():
       writer.writeframesraw(a)
 
     r = sr.Recognizer()
+    recognized = ""
     with sr.AudioFile(OUTPUT_FILE) as source:
         audio = r.record(source)
-        print(r.recognize_sphinx(audio))
+        recognized = r.recognize_sphinx(audio)
+        print(recognized)
 
-    return app.make_response(model.label('./speech.wav'))
+    label = model.label('./speech.wav')
+    return jsonify({'label': label, 'speech': recognized})
