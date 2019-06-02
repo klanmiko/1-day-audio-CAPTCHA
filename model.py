@@ -60,7 +60,7 @@ class Model():
 
     print("Loading kNN")
 
-    self.kNN = KNeighborsClassifier(algorithm="kd_tree")
+    self.kNN = KNeighborsClassifier(algorithm="kd_tree", n_neighbors=8)
     self.kNN.fit(np.concatenate(self.data), self.labels)
 
   def plot(self, audio, matches):
