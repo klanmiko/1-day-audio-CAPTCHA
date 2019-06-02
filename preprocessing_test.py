@@ -10,8 +10,6 @@ import pdb
 #AUDIO_FILE = 'dataset/train/good/andre.wav'
 
 def remove_silence(AUDIO_FILE):
-    AUDIO_FILE = 'stitched.wav'
-
     def grouper(n, iterable, fillvalue=None):
         args = [iter(iterable)] * n
         return zip_longest(fillvalue=fillvalue, *args)

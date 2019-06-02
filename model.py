@@ -45,11 +45,18 @@ class Model():
 
     self.data = self.good_data + self.bad_data
 
-    self.GMM_good = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
+    self.fnames = os.listdir(good_dir)
+    self.fnames = self.fnames + os.listdir(bad_dir)
+
+    print("training GMMs")    
+
+    self.GMM_good = GaussianMixture(n_components=50, covariance_type='full', n_init=2, max_iter=200, tol=1e-4)
     self.GMM_good.fit(np.concatenate(self.good_data))
 
-    self.GMM_bad = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
+    self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', n_init=2, max_iter=200, tol=1e-4)
     self.GMM_bad.fit(np.concatenate(self.bad_data))
+
+    print("Loading kNN")
 
     self.kNN = KNeighborsClassifier(algorithm="kd_tree")
     self.kNN.fit(np.concatenate(self.data), self.labels)
@@ -59,7 +66,7 @@ class Model():
     
     prediction = self.kNN.predict(feat)
     
-    good_count = len([i for i in prediction if i <= self.cutoff])
+    good_count = len([i for i in prediction if i < self.cutoff])
     bad_count = len(prediction) - good_count
 
     mapping = [0] * self.l_count
@@ -75,8 +82,34 @@ class Model():
     gscore = self.GMM_good.score(feat)
     bscore = self.GMM_bad.score(feat)
 
+    print("gscore: ", gscore)
+    print("bscore: ", bscore)
+
+    matches = [x for _, x in sorted(zip(mapping, self.fnames), reverse=True)]
+    print("Ordered matches: ")
+    print(matches)
+    (rate, sig) = wav.read("speech.wav")
+    plt.subplot(2,2,1)
+    plt.plot(mfcc(sig, rate))
+    plt.title("Sample")
+    ind = 2
+    titles = ["Closest Match", "Middle Match", "Furthest Match"]
+    for i in [0, int(len(matches)/2), len(matches) - 1]:
+      name = matches[i]
+      if name in os.listdir(good_dir):
+        (rate, sig) = wav.read(os.path.join(good_dir, name))
+      else:
+        (rate, sig)  = wav.read(os.path.join(bad_dir, name))
+      plt.subplot(2,2,ind)
+      plt.plot(mfcc(sig, rate))
+      plt.title(titles[ind  - 2])
+      ind = ind + 1
+
+    plt.show()
+
+
     score = gscore - bscore
 
     print(score)
 
-    return 'good' if count > 0 else 'bad'
+    return 'good' if count > 10 else 'bad'
