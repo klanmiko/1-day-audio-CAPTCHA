@@ -1,6 +1,7 @@
 import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
 import numpy as np
+import threading
 
 import pdb
 import os
@@ -61,6 +62,27 @@ class Model():
     self.kNN = KNeighborsClassifier(algorithm="kd_tree")
     self.kNN.fit(np.concatenate(self.data), self.labels)
 
+  def plot(self, audio, matches):
+    feat = extract_features(audio)
+
+    plt.subplot(2,2,1)
+    plt.plot(feat)
+    plt.title("Sample")
+    ind = 2
+    titles = ["Closest Match", "Middle Match", "Furthest Match"]
+    for i in [0, int(len(matches)/2), len(matches) - 1]:
+      name = matches[i]
+      if name in os.listdir(good_dir):
+        feat = extract_features(os.path.join(good_dir, name))
+      else:
+        feat  = extract_features(os.path.join(bad_dir, name))
+      plt.subplot(2,2,ind)
+      plt.plot(feat)
+      plt.title(titles[ind  - 2])
+      ind = ind + 1
+    
+    plt.show()
+
   def label(self, audio):
     feat = extract_features(audio)
     
@@ -88,25 +110,8 @@ class Model():
     matches = [x for _, x in sorted(zip(mapping, self.fnames), reverse=True)]
     print("Ordered matches: ")
     print(matches)
-    (rate, sig) = wav.read("speech.wav")
-    plt.subplot(2,2,1)
-    plt.plot(mfcc(sig, rate))
-    plt.title("Sample")
-    ind = 2
-    titles = ["Closest Match", "Middle Match", "Furthest Match"]
-    for i in [0, int(len(matches)/2), len(matches) - 1]:
-      name = matches[i]
-      if name in os.listdir(good_dir):
-        (rate, sig) = wav.read(os.path.join(good_dir, name))
-      else:
-        (rate, sig)  = wav.read(os.path.join(bad_dir, name))
-      plt.subplot(2,2,ind)
-      plt.plot(mfcc(sig, rate))
-      plt.title(titles[ind  - 2])
-      ind = ind + 1
 
-    plt.show()
-
+    t1 = threading.Thread(target=self.plot, args=(self, audio, matches)) 
 
     score = gscore - bscore
 
