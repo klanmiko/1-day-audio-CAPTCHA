@@ -16,7 +16,7 @@ bad_dir = os.path.join(os.path.curdir, "dataset","train", "bad")
 
 def extract_features(audio):
   (rate, sig) = wav.read(audio)
-  features = mfcc(sig, rate, nfft=1024)
+  features = mfcc(sig, rate, nfft=1024, preemph=0.9)
   d = delta(features, 2)
   return list(map(lambda x, y: x + y, features, d))
 
@@ -24,14 +24,23 @@ class Model():
   def train(self):
     self.good_data = []
     self.bad_data = []
+    self.labels = []
+    self.l_count = 0
     for audio in os.listdir(good_dir):
-        self.good_data.append(extract_features(os.path.join(good_dir, audio)))
+        features = extract_features(os.path.join(good_dir, audio))
+        self.good_data.append(features)
+        self.labels += ([self.l_count] * len(features))
+        self.l_count += 1
+
+    self.cutoff = self.l_count
 
     for audio in os.listdir(bad_dir):
-        self.bad_data.append(extract_features(os.path.join(bad_dir, audio)))
+        features = extract_features(os.path.join(bad_dir, audio))
+        self.bad_data.append(features)
+        self.labels += ([self.l_count] * len(features))
+        self.l_count += 1
 
     self.data = self.good_data + self.bad_data
-    self.labels = [1] * sum(map(len, self.good_data)) + [0] * sum(map(len, self.bad_data))
 
     self.GMM_good = GaussianMixture(n_components=5, covariance_type='full', n_init=3, max_iter=1000, tol=1e-4)
     self.GMM_good.fit(np.concatenate(self.good_data))
@@ -46,9 +55,19 @@ class Model():
     feat = extract_features(audio)
     
     prediction = self.kNN.predict(feat)
-    good_count = sum(prediction)
+    
+    good_count = len([i for i in prediction if i <= self.cutoff])
     bad_count = len(prediction) - good_count
-    print(good_count - bad_count)
+
+    mapping = [0] * self.l_count
+    for i in prediction:
+      mapping[i] += 1
+
+    print(mapping)
+    print("good_count: ", good_count)
+    print("bad_count: ", bad_count)
+
+    count = good_count - bad_count
       
     gscore = self.GMM_good.score(feat)
     bscore = self.GMM_bad.score(feat)
@@ -57,4 +76,4 @@ class Model():
 
     print(score)
 
-    return 'good' if score > 0 else 'bad'
+    return 'good' if count > 0 else 'bad'

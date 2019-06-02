@@ -3,13 +3,19 @@ import audioop
 from scipy import signal
 import numpy as np
 import matplotlib.pyplot as plt
+import wave
+import ctypes
 
 opus = pyogg.OpusFile('./speech.ogg')
-buffer = np.ctypeslib.as_array(opus.buffer, shape=(opus.buffer_length,))
-# f, t, Sxx = signal.spectrogram(x, fs=fs)
-print(buffer / 1000)
-f, t, Sxx = signal.spectrogram(buffer / 1000, fs=opus.frequency, window=('hamming'))
-plt.pcolormesh(t, f, Sxx)
-plt.ylabel('Frequency [Hz]')
-plt.xlabel('Time [sec]')
-plt.show()
+print(opus.buffer_length)
+bfarr_t = ctypes.c_int16*(int(opus.buffer_length / 2))
+bf = bfarr_t.from_buffer(ctypes.pointer(opus.buffer))
+
+with wave.open('./speech.wav', 'wb') as writer:
+  writer.setnchannels(opus.channels)
+  writer.setframerate(opus.frequency)
+  writer.setsampwidth(2)
+  writer.writeframesraw(a)
+
+with wave.open('./speech.wav', 'rb') as reader:
+  print(reader.getparams())
