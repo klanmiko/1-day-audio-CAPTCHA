@@ -11,11 +11,14 @@ from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.mixture import GaussianMixture
 
+from preprocessing_test import remove_silence
+
 good_dir = os.path.join(os.path.curdir, "dataset", "train", "good")
 bad_dir = os.path.join(os.path.curdir, "dataset","train", "bad")
 
 def extract_features(audio):
-  (rate, sig) = wav.read(audio)
+  sound = remove_silence(audio)
+  (rate, sig) = wav.read(sound)
   features = mfcc(sig, rate, nfft=1024, preemph=0.9)
   d = delta(features, 2)
   return list(map(lambda x, y: x + y, features, d))
