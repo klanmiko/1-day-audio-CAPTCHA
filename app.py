@@ -9,6 +9,8 @@ import os
 import wave
 import array
 
+import speech_recognition as sr
+
 from captcha_gen.generator import generate_captcha
 
 app = Flask(__name__)
@@ -30,11 +32,18 @@ def audio():
     for i in range(int(opus.buffer_length / 2)): # pyogg doubles it for some reason
       a.append(opus.buffer[i])
 
-    with wave.open('./speech.wav', 'wb') as writer:
+    OUTPUT_FILE = './speech.wav'
+
+    with wave.open(OUTPUT_FILE, 'wb') as writer:
       writer.setnchannels(opus.channels)
       writer.setframerate(opus.frequency)
       writer.setnframes(opus.buffer_length)
       writer.setsampwidth(2)
       writer.writeframesraw(a)
+
+    r = sr.Recognizer()
+    with sr.AudioFile(OUTPUT_FILE) as source:
+        audio = r.record(source)
+        print(r.recognize_sphinx(audio))
 
     return app.make_response(model.label('./speech.wav'))

@@ -1,6 +1,7 @@
 import speech_recognition as sr
 
-AUDIO_FILE='dataset/train/good/kaelan.wav'
+#AUDIO_FILE='dataset/train/good/kaelan.wav'
+AUDIO_FILE='stitched.wav'
 
 r = sr.Recognizer()
 with sr.AudioFile(AUDIO_FILE) as source:
