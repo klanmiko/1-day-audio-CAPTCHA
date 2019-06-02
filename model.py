@@ -29,15 +29,15 @@ class Model():
     for audio in os.listdir(good_dir):
         features = extract_features(os.path.join(good_dir, audio))
         self.good_data.append(features)
-        self.labels += ([label] * len(features))
-        label += 1
+        self.labels += ([self.label] * len(features))
+        self.label += 1
 
-    self.cutoff = label
+    self.cutoff = self.label
 
     for audio in os.listdir(bad_dir):
         features = extract_features(os.path.join(bad_dir, audio))
         self.bad_data.append(features)
-        self.labels += ([label] * len(features))
+        self.labels += ([self.label] * len(features))
         self.label += 1
 
     self.data = self.good_data + self.bad_data
