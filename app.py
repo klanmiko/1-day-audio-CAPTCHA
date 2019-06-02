@@ -25,21 +25,25 @@ def index():
 @app.route('/audio', methods=['POST'])
 def audio():
     speech = request.files['speech']
-    speech.save('./speech.ogg')
-    opus = pyogg.OpusFile('./speech.ogg')
-
-    a = array.array('h')
-    for i in range(int(opus.buffer_length / 2)): # pyogg doubles it for some reason
-      a.append(opus.buffer[i])
-
     OUTPUT_FILE = './speech.wav'
 
-    with wave.open(OUTPUT_FILE, 'wb') as writer:
-      writer.setnchannels(opus.channels)
-      writer.setframerate(opus.frequency)
-      writer.setnframes(opus.buffer_length)
-      writer.setsampwidth(2)
-      writer.writeframesraw(a)
+    if speech.mimetype == 'audio/ogg':
+      speech.save('./speech.ogg')
+      opus = pyogg.OpusFile('./speech.ogg')
+
+      a = array.array('h')
+      for i in range(int(opus.buffer_length / 2)): # pyogg doubles it for some reason
+        a.append(opus.buffer[i])
+
+      with wave.open(OUTPUT_FILE, 'wb') as writer:
+        writer.setnchannels(opus.channels)
+        writer.setframerate(opus.frequency)
+        writer.setnframes(opus.buffer_length)
+        writer.setsampwidth(2)
+        writer.writeframesraw(a)
+
+    elif speech.mimetype == 'audio/wav':
+      speech.save(OUTPUT_FILE)
 
     r = sr.Recognizer()
     recognized = ""

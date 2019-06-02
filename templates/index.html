@@ -11,15 +11,43 @@
     <button onclick="record()">Record</button>
     <button onclick="stop()">Stop</button>
     <audio id="player" controls></audio>
+    <input id="file" type="file" />
     <p id="result"></p>
     <p id="text"></p>
     <script>
       var recorder;
+
+      function sendData(e) {
+        let data = new FormData();
+        data.append('speech', e);
+
+        let request = new XMLHttpRequest()
+        request.onload = function() {
+          let json = JSON.parse(request.response)
+          result.innerText = json.label;
+          text.innerText = json.speech;
+        }
+        request.open('POST', '/audio', true);
+        request.send(data);
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        let file_input = document.getElementById('file')
+        file_input.onchange = (ev) => {
+          let t = ev.target;
+          let file = t.files[0];
+          sendData(file);
+        }
+      });
+
       function stop() {
         if(recorder) {
           let file = recorder.stop();
         }
       }
+
+      
+
       function record() {
         let result = document.getElementById('result')
         let text = document.getElementById('text')
@@ -36,17 +64,7 @@
               let url = URL.createObjectURL(e.data);
               player.src = url;
 
-              let data = new FormData();
-              data.append('speech', e.data);
-
-              let request = new XMLHttpRequest()
-              request.onload = function() {
-                let json = JSON.parse(request.response)
-                result.innerText = json.label;
-                text.innerText = json.speech;
-              }
-              request.open('POST', '/audio', true);
-              request.send(data);
+              sendData(e.data);
             }
             recorder.start();
           });
