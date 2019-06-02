@@ -1,7 +1,7 @@
 import scipy.io.wavfile as wav
 import matplotlib.pyplot as plt
 import numpy as np
-import threading
+from multiprocessing import Process
 
 import pdb
 import os
@@ -22,7 +22,8 @@ def extract_features(audio):
   (rate, sig) = wav.read(sound)
   features = mfcc(sig, rate, nfft=1024, preemph=0.9)
   d = delta(features, 2)
-  return list(map(lambda x, y: x + y, features, d))
+  dd = delta(d, 2)
+  return list(map(lambda x, y, z: x + y + z, features, d, dd))
 
 class Model():
   def train(self):
@@ -63,25 +64,28 @@ class Model():
     self.kNN.fit(np.concatenate(self.data), self.labels)
 
   def plot(self, audio, matches):
-    feat = extract_features(audio)
+    try:
+      feat = extract_features(audio)
 
-    plt.subplot(2,2,1)
-    plt.plot(feat)
-    plt.title("Sample")
-    ind = 2
-    titles = ["Closest Match", "Middle Match", "Furthest Match"]
-    for i in [0, int(len(matches)/2), len(matches) - 1]:
-      name = matches[i]
-      if name in os.listdir(good_dir):
-        feat = extract_features(os.path.join(good_dir, name))
-      else:
-        feat  = extract_features(os.path.join(bad_dir, name))
-      plt.subplot(2,2,ind)
+      plt.subplot(2,2,1)
       plt.plot(feat)
-      plt.title(titles[ind  - 2])
-      ind = ind + 1
-    
-    plt.show()
+      plt.title("Sample")
+      ind = 2
+      titles = ["Closest Match", "Middle Match", "Furthest Match"]
+      for i in [0, int(len(matches)/2), len(matches) - 1]:
+        name = matches[i]
+        if name in os.listdir(good_dir):
+          feat = extract_features(os.path.join(good_dir, name))
+        else:
+          feat  = extract_features(os.path.join(bad_dir, name))
+        plt.subplot(2,2,ind)
+        plt.plot(feat)
+        plt.title(titles[ind  - 2])
+        ind = ind + 1
+      
+      plt.show()
+    except Exception as e:
+      print(e)
 
   def label(self, audio):
     feat = extract_features(audio)
@@ -111,7 +115,7 @@ class Model():
     print("Ordered matches: ")
     print(matches)
 
-    t1 = threading.Thread(target=self.plot, args=(audio, matches))
+    t1 = Process(target=self.plot, args=(audio, matches))
     t1.start()
 
     score = gscore - bscore
