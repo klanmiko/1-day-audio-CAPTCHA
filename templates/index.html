@@ -24,8 +24,8 @@
         let request = new XMLHttpRequest()
         request.onload = function() {
           let json = JSON.parse(request.response)
-          result.innerText = json.label;
-          text.innerText = json.speech;
+          result.innerText = json.label == 'good' ? "human" : "robot";
+          text.innerText = "You said: " + json.speech;
         }
         request.open('POST', '/audio', true);
         request.send(data);
