@@ -26,9 +26,6 @@ def remove_silence(AUDIO_FILE):
 
     result = array.array(sound.array_type, result)
 
-    print(len(result))
-    print(len(samples))
-
     new_sound = sound._spawn(result)
     new_sound.export('test_new.wav', format='wav')
     return 'test_new.wav'

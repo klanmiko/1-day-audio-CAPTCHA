@@ -53,10 +53,10 @@ class Model():
     print("training GMMs")    
 
     self.GMM_good = GaussianMixture(n_components=50, covariance_type='full', n_init=2, max_iter=200, tol=1e-4)
-    self.GMM_good.fit(np.concatenate(self.good_data))
+    # self.GMM_good.fit(np.concatenate(self.good_data))
 
     self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', n_init=2, max_iter=200, tol=1e-4)
-    self.GMM_bad.fit(np.concatenate(self.bad_data))
+    # self.GMM_bad.fit(np.concatenate(self.bad_data))
 
     print("Loading kNN")
 
@@ -105,11 +105,15 @@ class Model():
 
     count = good_count - bad_count
       
-    gscore = self.GMM_good.score(feat)
-    bscore = self.GMM_bad.score(feat)
+    # gscore = self.GMM_good.score(feat)
+    # bscore = self.GMM_bad.score(feat)
 
-    print("gscore: ", gscore)
-    print("bscore: ", bscore)
+    # print("gscore: ", gscore)
+    # print("bscore: ", bscore)
+
+    # score = gscore - bscore
+
+    # print(score)
 
     matches = [x for _, x in sorted(zip(mapping, self.fnames), reverse=True)]
     print("Ordered matches: ")
@@ -118,8 +122,6 @@ class Model():
     t1 = Process(target=self.plot, args=(audio, matches))
     t1.start()
 
-    score = gscore - bscore
-
-    print(score)
+    
 
     return 'good' if count > 10 else 'bad'
