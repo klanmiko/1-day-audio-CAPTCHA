@@ -4,6 +4,7 @@ import scipy.io.wavfile
 import os
 import fnmatch
 import sys
+import matplotlib.pyplot as plt
 
 FREQUENCY = 44100
 
@@ -46,3 +47,5 @@ fname = "stitched"
 scipy.io.wavfile.write(fname + ".wav", FREQUENCY, sound)
 os.system("aplay " + fname + ".wav")
 
+plt.plot(sound[:, 1])
+plt.show()
