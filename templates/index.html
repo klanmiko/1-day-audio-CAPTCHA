@@ -1,19 +1,192 @@
 <html>
   <head>
     <style>
+      body {
+        font-family: Arial;
+        text-align: center;
+      }
+
+      form {
+        box-sizing: border-box;
+      }
+
+      .container {
+        padding: 16px;
+      }
+
+      /* format input field boxes */
+      input[type=text], input[type=password] {
+        width: 40%;
+        padding: 15px;
+        margin: 5px auto;
+        display: block;
+        border: none;
+        background: #f1f1f1;
+      }
+
+      input[type=text]:focus, input[type=password]:focus {
+        background-color: #ddd;
+        outline: none;
+      }
+
+      hr {
+        border: 1px solid #f1f1f1;
+        margin-bottom: 25px;
+      }
+
+      /* format register button  */
+      .registerbtn {
+        background-color: #1f5272;
+        color: white;
+        padding: 16px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        width: 40%;
+        opacity: 0.9;
+      }
+
+      .registerbtn:hover {
+        opacity: 1;
+      }
+
+      a {
+        color: dodgerblue;
+      }
+
       #player {
         display: block;
+        align-items: center;
       }
+
+      /* hide the real input file button */
+      [type="file"] {
+        border: 0;
+        clip: rect(0, 0, 0, 0);
+        height: 1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute !important;
+        white-space: nowrap;
+        width: 1px;
+      }
+
+      /* button and input file button formatting */
+      .captchabtn, .file-upload {
+        background-color: #1f5272;
+        border: none;
+        color: white;
+        padding: 5px 13px;
+        text-align: center;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 6px 2px 6px 2px;
+        cursor: pointer;
+        border-radius: 15px;
+        opacity: 0.8;
+      }
+
+      .captchabtn:hover, .file-upload:hover {
+        opacity: 1;
+      }
+
+      /* center audio  */
+      audio {
+        margin: 0 auto;
+        display: block;
+      }
+
+      /* modal background */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        /* background-color: #474e5d; */
+        background-color: rgba(71,78,93, 0.7);
+        padding-top: 50px;
+      }
+
+      /* modal content */
+      .modal-content {
+        color: #333;
+        background-color: #fefefe;
+        margin: 10% auto 20% auto;
+        border: 1px solid #888;
+        width: 90%;
+      }
+
+      /* close button */
+      .close {
+        position: absolute;
+        right: 35px;
+        top: 15px;
+        font-size: 40px;
+        font-weight: bold;
+        color: #f1f1f1;
+      }
+
+      .close:hover, .close:focus {
+        color: #a7a7a7;
+        cursor: pointer;
+      }
+
     </style>
   </head>
   <body>
-    <p>{{ captcha }}</p>
-    <button onclick="record()">Record</button>
-    <button onclick="stop()">Stop</button>
-    <audio id="player" controls></audio>
-    <input id="file" type="file" />
-    <p id="result"></p>
-    <p id="text"></p>
+
+    <form onsubmit="document.getElementById('captchamodal').style.display='block'">
+      <div class="container">
+        <h1>Register for ECS 153</h1>
+        <p>Please fill out this form to create an hacker account.</p>
+        <hr>
+
+        <label for="email"><b>Email</b></label>
+        <input type="text" placeholder="Enter Email" name="email" required>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" required>
+
+        <label for="psw2"><b>Re-enter Password</b></label>
+        <input type="password" placeholder="Re-enter Password" name="psw2" required>
+        <hr>
+
+        <button type="submit" class="registerbtn">Register</button>
+      </div>
+    </form>
+
+    <div id="captchamodal" class="modal">
+      <span onclick="document.getElementById('captchamodal').style.display='none'" class="close" title="Close Modal">&times;</span>
+      <div class="modal-content">
+        <div class="description">
+          <p> Before you can proceed with registration, press record and repeat the phrase generated below. Once the phrase has been said, stop recording. </p>
+        </div>
+
+        <div class="captcha">
+          <div class="phrase">
+            <p> Repeat the phrase: {{ captcha }}</p>
+          </div>
+
+          <button class="captchabtn" onclick="record()">Record</button>
+          <button class="captchabtn" onclick="stop()">Stop</button>
+          <audio id="player" controls></audio>
+          <label for="file" class="file-upload">
+            <i class="fa fa-cloud-upload"></i> Choose File
+          </label>
+          <input id="file" type="file" />
+        </div>
+        <p id="result"></p>
+        <p id="text"></p>
+
+      </div>
+    </div>
+
+
     <script>
       var recorder;
 
@@ -24,7 +197,7 @@
         let request = new XMLHttpRequest()
         request.onload = function() {
           let json = JSON.parse(request.response)
-          result.innerText = json.label == 'good' ? "human" : "robot";
+          result.innerText = json.label == 'good' ? "Registration successful, you are human!" : "Registration failed, you are a robot!";
           text.innerText = "You said: " + json.speech;
         }
         request.open('POST', '/audio', true);
@@ -45,8 +218,6 @@
           let file = recorder.stop();
         }
       }
-
-      
 
       function record() {
         let result = document.getElementById('result')
