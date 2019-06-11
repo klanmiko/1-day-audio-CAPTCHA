@@ -103,6 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-*.wav
+speech.wav
+speech.ogg
+test_new.wav
 
 .vscode/*
