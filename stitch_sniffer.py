@@ -5,7 +5,7 @@ import os
 import fnmatch
 import sys
 import matplotlib.pyplot as plt
-from python_speech_features import mfcc
+from python_speech_features import mfcc, delta
 
 
 NOISETHRESHOLD = 1000
@@ -71,9 +71,15 @@ for i in range(len(elist) - 1):
 for i in range(len(soundlist)):
 	print(i)
 	s = soundlist[i]
-	f = plt.figure()
-	f.canvas.set_window_title('Mfcc for sound region ' + str(i))
-	plt.plot(mfcc(s, rate, nfft = 1103))
+	f1 = plt.figure()
+	f1.canvas.set_window_title('Mfcc for sound region ' + str(i))
+	features = mfcc(s, rate, nfft = 1103)
+	plt.plot(features)
+	plt.show(block = False)
+	d = delta(features, 2)
+	f2 = plt.figure()
+	f2.canvas.set_window_title("Histogram of deltas for region " + str(i))
+	plt.hist(d, bins = 'auto')
 	plt.show(block = False)
 
 fig = plt.figure()
