@@ -140,10 +140,10 @@
   </head>
   <body>
 
-    <form onsubmit="document.getElementById('captchamodal').style.display='block'">
+    <form onsubmit="loadCaptcha(event)">
       <div class="container">
         <h1>Register for ECS 153</h1>
-        <p>Please fill out this form to create an hacker account.</p>
+        <p>Please fill out this form to create a hacker account.</p>
         <hr>
 
         <label for="email"><b>Email</b></label>
@@ -169,12 +169,11 @@
 
         <div class="captcha">
           <div class="phrase">
-            <p> Repeat the phrase: {{ captcha }}</p>
+            <p> Repeat the phrase: <b>{{ captcha }}</b></p>
           </div>
 
           <button class="captchabtn" onclick="record()">Record</button>
           <button class="captchabtn" onclick="stop()">Stop</button>
-          <audio id="player" controls></audio>
           <label for="file" class="file-upload">
             <i class="fa fa-cloud-upload"></i> Choose File
           </label>
@@ -189,6 +188,11 @@
 
     <script>
       var recorder;
+
+      function loadCaptcha(e) {
+        document.getElementById('captchamodal').style.display='block';
+        e.preventDefault();
+      }
 
       function sendData(e) {
         let data = new FormData();
@@ -232,9 +236,6 @@
               mimeType: canWav
             });
             recorder.ondataavailable = function(e) {
-              let url = URL.createObjectURL(e.data);
-              player.src = url;
-
               sendData(e.data);
             }
             recorder.start();
