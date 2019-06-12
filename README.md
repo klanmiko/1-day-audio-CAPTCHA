@@ -1,5 +1,13 @@
 # 1-day-audio-CAPTCHA
 
+## Authors
+Andrei Blebea - The-Boogeyman, NotDirectorofKGB
+Kaelan Mikowicz - klanmiko
+Kamal Sadek - Kamal-Sadek
+Monisha Ravindar - mravindar
+
+## Main files
+
 app.py:
   - This is the main server file that gets called with recorded audio data from the user
   - Used to generate CAPTCHA text, load user response and check for correctness
