@@ -28,7 +28,7 @@ kaelan_average_coeff = np.average(kaelan_feat, axis=0)
 kaelan2_feat = mfcc(kaelan2_sig, kaelan2_rate)
 kaelan2_average_coeff = np.average(kaelan2_feat, axis=0)
 
-(bot_rate, bot_sig) = wav.read("dataset/train/bad/hal.wav")
+(bot_rate, bot_sig) = wav.read("dataset/train/bad/bothello.wav")
 bot_feat = mfcc(bot_sig, bot_rate)
 bot_average_coeff = np.average(bot_feat, axis=0)
 
@@ -44,7 +44,7 @@ bot3_average_coeff = np.average(bot3_feat, axis=0)
 human_feat = mfcc(human_sig, human_rate)
 human_average_coeff = np.average(human_feat, axis=0)
 
-(test_rate, test_sig) = wav.read("speech.wav")
+(test_rate, test_sig) = wav.read("dataset/human/homer1.wav")
 test_feat = mfcc(test_sig, test_rate)
 test_average_coeff = np.average(test_feat, axis=0)
 
