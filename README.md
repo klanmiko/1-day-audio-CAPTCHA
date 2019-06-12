@@ -5,7 +5,7 @@ The purpose of this project is to demonstrate the feasibility of using an audio 
 ## Authors
 - Andrei Blebea - The-Boogeyman, NotDirectorofKGB
 - Kaelan Mikowicz - klanmiko
-- Kamal Sadek - Kamal-Sadek
+- Kamal Sadek - Kamal-Sadek, KamalJS
 - Monisha Ravindar - mravindar
 
 ## Main files
