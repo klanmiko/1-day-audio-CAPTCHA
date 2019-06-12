@@ -61,8 +61,8 @@ class Model():
       bad_data = []
       train_labels = []
 
-      GMM_good = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
-      GMM_bad = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
+      GMM_good = GaussianMixture(n_components=256, covariance_type='full', max_iter=200, tol=1e-3)
+      GMM_bad = GaussianMixture(n_components=256, covariance_type='full', max_iter=200, tol=1e-3)
 
       kNN = KNeighborsClassifier(algorithm="kd_tree")
 
@@ -163,36 +163,34 @@ class Model():
 
     print("training GMMs")    
 
-    self.GMM_good = GaussianMixture(n_components=50, covariance_type='full', max_iter=100, tol=1e-3)
-    self.GMM_good.fit(np.concatenate(self.good_data))
+    self.GMM_good = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
+    #self.GMM_good.fit(np.concatenate(self.good_data))
 
-    self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=100, tol=1e-3)
-    self.GMM_bad.fit(np.concatenate(self.bad_data))
+    self.GMM_bad = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
+    #self.GMM_bad.fit(np.concatenate(self.bad_data))
 
-    regression_data = []
-    regression_labels = []
+    # regression_data = []
+    # regression_labels = []
 
-    for audio in os.listdir(good_dir):
-        features = feature_dict[audio]
-        gscore = self.GMM_good.score(features)
-        bscore = self.GMM_bad.score(features)
-        regression_data.append(gscore - bscore)
-        regression_labels.append(1)
+    # for audio in os.listdir(good_dir):
+    #     features = feature_dict[audio]
+    #     gscore = self.GMM_good.score(features)
+    #     bscore = self.GMM_bad.score(features)
+    #     regression_data.append(gscore - bscore)
+    #     regression_labels.append(1)
 
-    for audio in os.listdir(bad_dir):
-        features = feature_dict[audio]
-        gscore = self.GMM_good.score(features)
-        bscore = self.GMM_bad.score(features)
-        regression_data.append(gscore - bscore)
-        regression_labels.append(0)
+    # for audio in os.listdir(bad_dir):
+    #     features = feature_dict[audio]
+    #     gscore = self.GMM_good.score(features)
+    #     bscore = self.GMM_bad.score(features)
+    #     regression_data.append(gscore - bscore)
+    #     regression_labels.append(0)
 
-    fpr, tpr, thresholds = roc_curve(regression_labels, regression_data, drop_intermediate=False)
-    plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', label='ROC curve')
-    plt.show()
-    eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
-    self.thresh = interp1d(fpr, thresholds)(eer)
-    print("threshold: ", self.thresh)
+    # fpr, tpr, thresholds = roc_curve(regression_labels, regression_data, drop_intermediate=False)
+    
+    # eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    # self.thresh = interp1d(fpr, thresholds)(eer)
+    # print("threshold: ", self.thresh)
 
     print("Loading kNN")
 
@@ -234,12 +232,12 @@ class Model():
     print("good_count: ", good_count)
     print("bad_count: ", bad_count)
       
-    gscore = self.GMM_good.score(feat)
-    bscore = self.GMM_bad.score(feat)
+    # gscore = self.GMM_good.score(feat)
+    # bscore = self.GMM_bad.score(feat)
 
-    print("gscore: ", gscore)
-    print("bscore: ", bscore)
+    # print("gscore: ", gscore)
+    # print("bscore: ", bscore)
 
-    score = gscore - bscore
+    # score = gscore - bscore
 
     return 'good' if bad_count == 0 or good_count / bad_count > 3.5 else 0
