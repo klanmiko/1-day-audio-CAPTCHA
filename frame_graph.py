@@ -70,15 +70,14 @@ for audio in bot_files:
 
 N = len(files)
 ind = np.arange(N)
-width = 0.35
 
-p1 = plt.bar(ind, human_count_per)
-p2 = plt.bar(ind, bot_count_per)
+p1 = plt.bar(ind, bot_count_per, color='#1F77B4')
+p2 = plt.bar(ind, human_count_per, bottom=bot_count_per, color='#FF7F0E')
 
 plt.title('Number of Human vs Bot Frames per Sample')
 plt.ylabel('Number of Frames')
 plt.xticks(ind, ['Human 1', 'Human 2', 'Bot 1', 'Bot 2'])
-plt.legend((p1[0], p2[0]), ('Human Frames', 'Bot Frames'))
+plt.legend((p2[0], p1[0]), ('Human Frames', 'Bot Frames'))
 
 plt.show()
 
