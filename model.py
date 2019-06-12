@@ -12,7 +12,7 @@ from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.mixture import GaussianMixture
 
-from preprocessing_test import remove_silence
+from preprocessing import remove_silence
 
 good_dir = os.path.join(os.path.curdir, "dataset", "train", "good")
 bad_dir = os.path.join(os.path.curdir, "dataset","train", "bad")

@@ -8,7 +8,7 @@ import numpy as np
 
 from python_speech_features import mfcc
 from scipy.spatial import distance, KDTree
-from preprocessing_test import remove_silence
+from preprocessing import remove_silence
 
 human_training_dir = os.path.join(os.path.curdir, 'dataset', 'train', 'good')
 bot_training_dir = os.path.join(os.path.curdir, 'dataset', 'train', 'bad')

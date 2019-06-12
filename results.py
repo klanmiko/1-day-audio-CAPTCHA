@@ -7,7 +7,7 @@ import numpy as np
 
 from python_speech_features import mfcc
 from scipy.spatial import distance, KDTree
-from preprocessing_test import remove_silence
+from preprocessing import remove_silence
 
 def extract_features(audio):
     sound = remove_silence(audio)
@@ -41,12 +41,12 @@ human_count_per = []
 bot_count_per = []
 files = []
 
-for human_test_audio in ['sample1.wav', 'sample2.wav']:#in os.listdir(human_testing_dir):
+for human_test_audio in os.listdir(human_testing_dir):
     files.append(human_test_audio)
     print(human_test_audio)
     human_count_pre = human_count
     bot_count_pre = bot_count
-    for feature in extract_features(os.path.join(os.path.curdir, human_test_audio)):#human_testing_dir, human_test_audio)):
+    for feature in extract_features(os.path.join(human_testing_dir, human_test_audio)):
         (dist, ind) = tree.query(feature)
         if ind < len(human_data):
             human_count += 1
