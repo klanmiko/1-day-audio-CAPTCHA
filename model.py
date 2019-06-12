@@ -11,6 +11,7 @@ from scipy.spatial import distance
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_curve
 
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
@@ -52,13 +53,16 @@ class Model():
     kNN_scores = []
     kNN_recall = []
 
+    gmm_specificity = []
+    gmm_recall = []
+
     for train, test in skf.split(files, labels):
       good_data = []
       bad_data = []
       train_labels = []
 
-      #GMM_good = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
-      #GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
+      GMM_good = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
+      GMM_bad = GaussianMixture(n_components=256, covariance_type='full', max_iter=100, tol=1e-3)
 
       kNN = KNeighborsClassifier(algorithm="kd_tree")
 
@@ -73,35 +77,67 @@ class Model():
         
         train_labels += [labels[f]] * len(feat)
 
-      #GMM_good.fit(np.concatenate(good_data))
-
-      #GMM_bad.fit(np.concatenate(bad_data))
+      GMM_good.fit(np.concatenate(good_data))
+      GMM_bad.fit(np.concatenate(bad_data))
 
       kNN.fit(np.concatenate(good_data + bad_data), train_labels)
 
+      gmm_scores = []
+      l = []
+
+      for f in train:
+        feat = features[files[f]]
+        gscore = GMM_good.score(feat)
+        bscore = GMM_bad.score(feat)
+        gmm_scores.append(gscore - bscore)
+        l.append(labels[f])
+
+      fpr, tpr, thresholds = roc_curve(l, gmm_scores)
+      eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+      thresh = interp1d(fpr, thresholds)(eer)
+
       test_data = []
       test_labels = []
+      gmm_predictions = []
+      predictions = []
+      gmm_scores = []
 
       for f in test:
         if files[f] not in features:
           features[files[f]] = extract_features(files[f])
         feat = features[files[f]]
         test_data.append(feat)
-        test_labels += [labels[f]] * len(feat)
-
-      #GM_good_score = GMM_good.score(np.concatenate(test_data), test_labels)
-      #GM_bad_score = GMM_bad.score(np.concatenate(test_data), test_labels)
-      predictions = kNN.predict(np.concatenate(test_data))
+        test_labels.append(labels[f])
+        gscore = GMM_good.score(feat)
+        bscore = GMM_bad.score(feat)
+        gmm_predictions.append(0 if gscore - bscore < thresh else 1)
+        gmm_scores.append(gscore - bscore)
+        p = kNN.predict(feat)
+        g_count = sum(p)
+        b_count = len(p) - sum(p)
+        predictions.append(1 if b_count == 0 or g_count / b_count > 3.5 else 0)
+      
       tn, fp, fn, tp = metrics.confusion_matrix(test_labels, predictions).ravel()
       specificity = tn / (tn+fp)
       recall = tp / (tp + fn)
       kNN_scores.append(specificity)
       kNN_recall.append(recall)
+
+      tn, fp, fn, tp = metrics.confusion_matrix(test_labels, gmm_predictions).ravel()
+      specificity = tn / (tn+fp)
+      recall = tp / (tp + fn)
+      gmm_specificity.append(specificity)
+      gmm_recall.append(recall)
+
     avg_knn = np.array(kNN_scores).mean()
     avg_knn_recall = np.array(kNN_recall).mean()
-    print("specificity: ", avg_knn)
-    print("recall: ", avg_knn_recall)
-      
+    print("knn specificity: ", avg_knn)
+    print("knn recall: ", avg_knn_recall)
+
+    avg_knn = np.array(gmm_specificity).mean()
+    avg_knn_recall = np.array(gmm_recall).mean()
+    print("gmm specificity: ", avg_knn)
+    print("gmm recall: ", avg_knn_recall)
 
   def train(self):
     self.good_data = []
@@ -127,10 +163,10 @@ class Model():
 
     print("training GMMs")    
 
-    self.GMM_good = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
+    self.GMM_good = GaussianMixture(n_components=50, covariance_type='full', max_iter=100, tol=1e-3)
     self.GMM_good.fit(np.concatenate(self.good_data))
 
-    self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
+    self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=100, tol=1e-3)
     self.GMM_bad.fit(np.concatenate(self.bad_data))
 
     regression_data = []
@@ -140,18 +176,23 @@ class Model():
         features = feature_dict[audio]
         gscore = self.GMM_good.score(features)
         bscore = self.GMM_bad.score(features)
-        regression_data.append([gscore, bscore])
+        regression_data.append(gscore - bscore)
         regression_labels.append(1)
 
     for audio in os.listdir(bad_dir):
         features = feature_dict[audio]
         gscore = self.GMM_good.score(features)
         bscore = self.GMM_bad.score(features)
-        regression_data.append([gscore, bscore])
+        regression_data.append(gscore - bscore)
         regression_labels.append(0)
 
-    self.regressor = LogisticRegression()
-    self.regressor.fit(regression_data, regression_labels)
+    fpr, tpr, thresholds = roc_curve(regression_labels, regression_data, drop_intermediate=False)
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', label='ROC curve')
+    plt.show()
+    eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
+    self.thresh = interp1d(fpr, thresholds)(eer)
+    print("threshold: ", self.thresh)
 
     print("Loading kNN")
 
@@ -192,8 +233,6 @@ class Model():
 
     print("good_count: ", good_count)
     print("bad_count: ", bad_count)
-
-    count = good_count - bad_count
       
     gscore = self.GMM_good.score(feat)
     bscore = self.GMM_bad.score(feat)
@@ -203,7 +242,4 @@ class Model():
 
     score = gscore - bscore
 
-    prediction = self.regressor.predict(np.array([[gscore, bscore]]))
-    print("GMM + logit: ", prediction[0])
-
-    return 'good' if prediction[0] is 1 else 'bad'
+    return 'good' if bad_count == 0 or good_count / bad_count > 3.5 else 0
