@@ -31,3 +31,14 @@ set FLASK_ENV=development (Windows)
 export FLASK_ENV=development (Unix)
 flask run
 ```
+
+## Requirements
+The requirements.txt should include all the Python libraries needed to run the scripts. You simply need to install them (preferrably throught a virtual environment):
+```
+pip install -r requirements.txt
+```
+
+Additionally, there are a few systemwide packages that need to be installed. These are tkinter, festival, sox, and the Opus libraries (both the base package and the files package). If running in Ubuntu, the libraries can be installed with
+```
+sudo apt install python3-tk libopus-dev libopusfile-dev festival sox
+```
