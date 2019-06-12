@@ -9,6 +9,11 @@ import os
 from python_speech_features import mfcc, logfbank, delta
 from scipy.spatial import distance
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import BaggingClassifier
+from sklearn.linear_model import LogisticRegression
+
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
 
 from sklearn import metrics
 
@@ -33,6 +38,7 @@ class Model():
   def evaluate(self):
     files = []
     labels = []
+    features = {}
     for audio in os.listdir(good_dir):
         files.append(os.path.join(good_dir, audio))
         labels.append(1)
@@ -53,10 +59,13 @@ class Model():
 
       #GMM_good = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
       #GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
-      kNN = KNeighborsClassifier(algorithm="kd_tree", n_neighbors=8)
+
+      kNN = KNeighborsClassifier(algorithm="kd_tree")
 
       for f in train:
-        feat = extract_features(files[f])
+        if files[f] not in features:
+          features[files[f]] = extract_features(files[f])
+        feat = features[files[f]]
         if labels[f] == 1:
           good_data.append(feat)
         else:
@@ -74,7 +83,9 @@ class Model():
       test_labels = []
 
       for f in test:
-        feat = extract_features(files[f])
+        if files[f] not in features:
+          features[files[f]] = extract_features(files[f])
+        feat = features[files[f]]
         test_data.append(feat)
         test_labels += [labels[f]] * len(feat)
 
@@ -96,13 +107,16 @@ class Model():
     self.good_data = []
     self.bad_data = []
     self.labels = []
+    feature_dict = {}
 
     for audio in os.listdir(good_dir):
         features = extract_features(os.path.join(good_dir, audio))
+        feature_dict[audio] = features
         self.good_data.append(features)
 
     for audio in os.listdir(bad_dir):
         features = extract_features(os.path.join(bad_dir, audio))
+        feature_dict[audio] = features
         self.bad_data.append(features)
 
     self.data = self.good_data + self.bad_data
@@ -118,6 +132,26 @@ class Model():
 
     self.GMM_bad = GaussianMixture(n_components=50, covariance_type='full', max_iter=200, tol=1e-4)
     self.GMM_bad.fit(np.concatenate(self.bad_data))
+
+    regression_data = []
+    regression_labels = []
+
+    for audio in os.listdir(good_dir):
+        features = feature_dict[audio]
+        gscore = self.GMM_good.score(features)
+        bscore = self.GMM_bad.score(features)
+        regression_data.append([gscore, bscore])
+        regression_labels.append(1)
+
+    for audio in os.listdir(bad_dir):
+        features = feature_dict[audio]
+        gscore = self.GMM_good.score(features)
+        bscore = self.GMM_bad.score(features)
+        regression_data.append([gscore, bscore])
+        regression_labels.append(0)
+
+    self.regressor = LogisticRegression()
+    self.regressor.fit(regression_data, regression_labels)
 
     print("Loading kNN")
 
@@ -169,6 +203,7 @@ class Model():
 
     score = gscore - bscore
 
-    print(score)
+    prediction = self.regressor.predict(np.array([[gscore, bscore]]))
+    print("GMM + logit: ", prediction[0])
 
-    return 'good' if count > 10 else 'bad'
+    return 'good' if prediction[0] is 1 else 'bad'
